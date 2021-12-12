@@ -14,10 +14,6 @@
       <CustomTableColumn prop="id" title="Comment ID" />
       <CustomTableColumn prop="name" title="Title" />
       <CustomTableColumn prop="email" title="Email">
-        <template #title>
-          <b>Email</b>
-        </template>
-
         <template #body="{ row }">
           <a :href="`mailto:${row.email}`">{{ row.email }}</a>
         </template>
@@ -73,11 +69,14 @@ export default {
     await this.getPageByNumber(0, this.perPage)
   },
   methods: {
+    getPagesCount(rows) {
+      return Math.ceil(rows.length / this.perPage)
+    },
     async fetchAllRows() {
       const response = await fetch(API_URL);
       const json = await response.json()
       this.allData = json
-      this.totalPagesCount = Math.ceil(json.length / this.perPage)
+      this.totalPagesCount = this.getPagesCount(json)
     },
     getPageByNumber(page) {
       if (page < 0 || page >= this.totalPagesCount) {
@@ -101,6 +100,9 @@ export default {
       }
       return 0
     },
+    escapeRegex(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    },
     async fetchPage() {
       const start = this.currentPage * this.perPage
       const end = start + this.perPage
@@ -108,7 +110,7 @@ export default {
       let newRows = [...this.allData]
       this.filters.forEach(({ prop, value }) => {
         newRows = newRows.filter(element => {
-          return new RegExp(`^${value}`, 'i').test(element[prop])
+          return new RegExp(this.escapeRegex(value), 'i').test(element[prop])
         })
       })
 
@@ -118,6 +120,8 @@ export default {
         newRows = newRows.sort((a, b) => this.sortComparator(a, b, prop, value, checkedSorters))
         checkedSorters.push(prop)
       })
+
+      this.totalPagesCount = this.getPagesCount(newRows)
 
       newRows = newRows.slice(start, end)
 

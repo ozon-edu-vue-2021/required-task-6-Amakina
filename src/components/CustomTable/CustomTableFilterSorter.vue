@@ -13,6 +13,7 @@ export default {
     }
   },
   render(h, context) {
+    const { $style } = context
     const { columns, sorters }  = context.props
     const renderedColumns = columns.map(column => {
       const activeSorter = sorters.find(sorter => sorter.prop === column.prop) || { value: 'no' }
@@ -26,9 +27,9 @@ export default {
       const renderedButtons = buttons.map(({ value, view }) => (
         <button 
             class={[
-              context.$style.sorter,
+              $style.sorter,
               {
-                [context.$style.sorter_active]: activeSorter.value === value
+                [$style.sorter_active]: activeSorter.value === value
               }
             ]} 
             on={{click: () => context.listeners.onSort(column.prop, value)}}
@@ -40,16 +41,16 @@ export default {
       return (
         <td>
           <input 
-            class={context.$style.filter} 
+            class={$style.filter} 
             placeholder={column.title}
             on={{input: (e) => context.listeners.onFilter(column.prop, e.target.value) }}
           />
-          {...renderedButtons}
+          {renderedButtons}
         </td>
       )
     }) 
     return (
-      <tr>{...renderedColumns}</tr>
+      <tr>{renderedColumns}</tr>
     )
   }
 }

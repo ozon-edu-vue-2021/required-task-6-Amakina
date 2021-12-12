@@ -18,7 +18,7 @@ export default {
     return rows.map(row => 
       <tr>
       {
-        ...columnSettings.map(column => {
+        columnSettings.map(column => {
           const columnToRender = column.scopedSlots.body
             ? column.scopedSlots.body({ row }) 
             : row[column.prop]
